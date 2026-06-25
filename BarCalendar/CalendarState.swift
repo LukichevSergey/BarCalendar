@@ -265,8 +265,6 @@ final class CalendarState {
             alertedEventIDs.insert(id)
             EventAlertManager.shared.show(event: event, soundEnabled: alertSoundEnabled)
         }
-
-        EventAlertManager.shared.dismissIfPast()
     }
 
     // MARK: - Init

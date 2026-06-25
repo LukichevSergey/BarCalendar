@@ -120,18 +120,4 @@ final class EventAlertManager {
             dismiss(eventID: id)
         }
     }
-
-    func dismissIfPast() {
-        let now = Date()
-        let expiredIDs = windows.keys.filter { id in
-            guard let window = windows[id]?.first,
-                  let hosting = window.contentViewController as? NSHostingController<EventAlertView> else {
-                return true
-            }
-            return hosting.rootView.event.startDate <= now
-        }
-        for id in expiredIDs {
-            dismiss(eventID: id)
-        }
-    }
 }
