@@ -33,6 +33,7 @@ final class CalendarState {
 
     private let eventStore = EKEventStore()
     private var observerTask: Task<Void, Never>?
+    private var calendarChangeTask: Task<Void, Never>?
     private var countdownTimer: Task<Void, Never>?
 
     /// Current day number as a string, for display in the menu bar.
@@ -217,6 +218,12 @@ final class CalendarState {
         observerTask = Task { @MainActor [weak self] in
             for await _ in NotificationCenter.default.notifications(named: .checkCalendarAccess) {
                 self?.requestCalendarAccess()
+            }
+        }
+
+        calendarChangeTask = Task { @MainActor [weak self] in
+            for await _ in NotificationCenter.default.notifications(named: .EKEventStoreChanged) {
+                self?.fetchEvents()
             }
         }
 
