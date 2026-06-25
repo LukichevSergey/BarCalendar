@@ -3,6 +3,7 @@ import EventKit
 
 extension Notification.Name {
     static let checkCalendarAccess = Notification.Name("checkCalendarAccess")
+    static let countdownUpdated = Notification.Name("countdownUpdated")
 }
 
 // MARK: - CalendarState
@@ -23,13 +24,23 @@ final class CalendarState {
     var startOfWeek: Int
     /// Number of upcoming days to show events for (0–7); 0 hides the events section.
     var eventsDaysToShow: Int
+    /// Whether the countdown timer is shown in the menu bar and popover.
+    var countdownEnabled: Bool
+    /// Threshold in minutes; countdown shown only when less than this much time remains.
+    var countdownThreshold: Int
+    /// Cached countdown text, e.g. "45m" or "1h 23m". Empty when no countdown is active.
+    var countdownText: String = ""
 
     private let eventStore = EKEventStore()
     private var observerTask: Task<Void, Never>?
+    private var countdownTimer: Task<Void, Never>?
 
     /// Current day number as a string, for display in the menu bar.
     var menuBarDateText: String {
         let day = Calendar.current.component(.day, from: Date())
+        if countdownEnabled && !countdownText.isEmpty {
+            return "\(day)  \(countdownText)"
+        }
         return "\(day)"
     }
 
@@ -69,6 +80,7 @@ final class CalendarState {
 
         let predicate = eventStore.predicateForEvents(withStart: rangeStart, end: rangeEnd, calendars: nil)
         events = eventStore.events(matching: predicate)
+        updateCountdown()
     }
 
     /// Returns cached events that overlap the given day.
@@ -112,6 +124,84 @@ final class CalendarState {
         fetchEvents()
     }
 
+    // MARK: - Countdown
+
+    /// Persists the countdown-enabled preference and starts/stops the timer.
+    func saveCountdownEnabled(_ value: Bool) {
+        countdownEnabled = value
+        UserDefaults.standard.set(value, forKey: "countdownEnabled")
+        if value {
+            startCountdownTimer()
+        } else {
+            stopCountdownTimer()
+            countdownText = ""
+            NotificationCenter.default.post(name: .countdownUpdated, object: nil)
+        }
+    }
+
+    /// Persists the countdown threshold preference and immediately recalculates.
+    func saveCountdownThreshold(_ value: Int) {
+        countdownThreshold = value
+        UserDefaults.standard.set(value, forKey: "countdownThreshold")
+        updateCountdown()
+    }
+
+    /// Starts the countdown timer that updates every 60 seconds.
+    private func startCountdownTimer() {
+        countdownTimer?.cancel()
+        countdownTimer = Task { @MainActor [weak self] in
+            self?.updateCountdown()
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(60))
+                guard !Task.isCancelled else { break }
+                self?.updateCountdown()
+            }
+        }
+    }
+
+    /// Stops the countdown timer.
+    private func stopCountdownTimer() {
+        countdownTimer?.cancel()
+        countdownTimer = nil
+    }
+
+    /// Calculates the time remaining to the next upcoming event and formats the countdown text.
+    private func updateCountdown() {
+        let now = Date()
+        let upcoming = events
+            .filter { $0.startDate > now }
+            .sorted { $0.startDate < $1.startDate }
+
+        guard let next = upcoming.first else {
+            if !countdownText.isEmpty {
+                countdownText = ""
+                NotificationCenter.default.post(name: .countdownUpdated, object: nil)
+            }
+            return
+        }
+
+        let remaining = next.startDate.timeIntervalSince(now)
+        let thresholdSeconds = Double(countdownThreshold) * 60
+
+        guard remaining <= thresholdSeconds else {
+            if !countdownText.isEmpty {
+                countdownText = ""
+                NotificationCenter.default.post(name: .countdownUpdated, object: nil)
+            }
+            return
+        }
+
+        let totalMinutes = Int(remaining) / 60
+        if totalMinutes >= 60 {
+            let hours = totalMinutes / 60
+            let minutes = totalMinutes % 60
+            countdownText = minutes > 0 ? "\(hours)h \(minutes)m" : "\(hours)h"
+        } else {
+            countdownText = "\(totalMinutes)m"
+        }
+        NotificationCenter.default.post(name: .countdownUpdated, object: nil)
+    }
+
     // MARK: - Init
 
     init() {
@@ -119,6 +209,9 @@ final class CalendarState {
         self.startOfWeek = savedStart == 1 ? 1 : 2
         let savedDays = UserDefaults.standard.integer(forKey: "eventsDaysToShow")
         self.eventsDaysToShow = savedDays >= 0 && savedDays <= 7 ? savedDays : 2
+        self.countdownEnabled = UserDefaults.standard.bool(forKey: "countdownEnabled")
+        let savedThreshold = UserDefaults.standard.integer(forKey: "countdownThreshold")
+        self.countdownThreshold = savedThreshold > 0 ? savedThreshold : Layout.defaultCountdownThreshold
         self.displayedMonth = Date()
 
         observerTask = Task { @MainActor [weak self] in
@@ -128,5 +221,9 @@ final class CalendarState {
         }
 
         requestCalendarAccess()
+
+        if countdownEnabled {
+            startCountdownTimer()
+        }
     }
 }

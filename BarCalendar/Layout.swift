@@ -12,4 +12,7 @@ enum Layout {
     static let groupSpacing: CGFloat = 4
     static let eventRowSpacing: CGFloat = 6
     static let eventColorDotSize: CGFloat = 6
+    static let countdownVerticalPadding: CGFloat = 2
+    static let countdownFontSize: CGFloat = 11
+    static let defaultCountdownThreshold = 120
 }

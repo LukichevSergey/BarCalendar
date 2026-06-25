@@ -26,6 +26,25 @@ struct SettingsView: View {
                 Text("6 days").tag(6)
                 Text("7 days").tag(7)
             }
+
+            Section("Countdown") {
+                Toggle("Show countdown timer", isOn: Binding(
+                    get: { state.countdownEnabled },
+                    set: { state.saveCountdownEnabled($0) }
+                ))
+                if state.countdownEnabled {
+                    Picker("Threshold", selection: Binding(
+                        get: { state.countdownThreshold },
+                        set: { state.saveCountdownThreshold($0) }
+                    )) {
+                        Text("15 minutes").tag(15)
+                        Text("30 minutes").tag(30)
+                        Text("1 hour").tag(60)
+                        Text("2 hours").tag(120)
+                        Text("3 hours").tag(180)
+                    }
+                }
+            }
         }
         .formStyle(.grouped)
         .navigationTitle("Settings")

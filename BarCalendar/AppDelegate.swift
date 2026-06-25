@@ -23,6 +23,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let hostingController = NSHostingController(rootView: CalendarDropdownView(state: sharedState))
         hostingController.view.frame = NSRect(x: 0, y: 0, width: Layout.popoverWidth, height: Layout.popoverHeight)
         popover?.contentViewController = hostingController
+
+        NotificationCenter.default.addObserver(
+            forName: .countdownUpdated,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.statusItem?.button?.title = sharedState.menuBarDateText
+        }
     }
 
     @objc func togglePopover() {

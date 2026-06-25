@@ -21,6 +21,8 @@ struct CalendarDropdownView: View {
             WeekdayHeaderRow(startOfWeek: state.startOfWeek)
             CalendarGridView(state: state)
 
+            CountdownView(text: state.countdownText)
+
             Divider()
 
             EventsSectionView(state: state)
