@@ -9,7 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem?.button {
-            let size = NSSize(width: 18, height: 18)
+            let size = NSSize(width: 20, height: 20)
             let image = NSImage(size: size, flipped: false) { rect in
                 if let symbol = NSImage(systemSymbolName: "calendar", accessibilityDescription: "Calendar") {
                     let config = NSImage.SymbolConfiguration(pointSize: 14, weight: .medium)
@@ -22,7 +22,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             image.isTemplate = true
             button.image = image
             button.title = sharedState.menuBarDateText
-            button.font = NSFont.systemFont(ofSize: Layout.statusBarFontSize, weight: .medium)
             button.action = #selector(togglePopover)
             button.target = self
         }
