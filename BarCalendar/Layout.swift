@@ -15,4 +15,9 @@ enum Layout {
     static let countdownVerticalPadding: CGFloat = 2
     static let countdownFontSize: CGFloat = 11
     static let defaultCountdownThreshold = 120
+    static let alertWindowCornerRadius: CGFloat = 16
+    static let alertWindowPadding: CGFloat = 32
+    static let alertButtonHeight: CGFloat = 44
+    static let alertButtonCornerRadius: CGFloat = 22
+    static let screenEdgePadding: CGFloat = 40
 }

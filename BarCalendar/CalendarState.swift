@@ -30,11 +30,19 @@ final class CalendarState {
     var countdownThreshold: Int
     /// Cached countdown text, e.g. "45m" or "1h 23m". Empty when no countdown is active.
     var countdownText: String = ""
+    /// Whether event alert overlays are enabled.
+    var alertEnabled: Bool
+    /// Minutes before an event to show the alert overlay.
+    var alertMinutesBefore: Int
+    /// Whether to play a sound when the alert appears.
+    var alertSoundEnabled: Bool
 
     private let eventStore = EKEventStore()
     private var observerTask: Task<Void, Never>?
     private var calendarChangeTask: Task<Void, Never>?
     private var countdownTimer: Task<Void, Never>?
+    private var alertTimer: Task<Void, Never>?
+    private var alertedEventIDs: Set<String> = []
 
     /// Countdown text for the menu bar. Empty when no countdown is active.
     var menuBarDateText: String {
@@ -152,7 +160,8 @@ final class CalendarState {
         countdownTimer = Task { @MainActor [weak self] in
             self?.updateCountdown()
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(60))
+                let secondsToNextMinute = 60 - Calendar.current.component(.second, from: Date())
+                try? await Task.sleep(for: .seconds(secondsToNextMinute))
                 guard !Task.isCancelled else { break }
                 self?.updateCountdown()
             }
@@ -191,7 +200,7 @@ final class CalendarState {
             return
         }
 
-        let totalMinutes = Int(remaining) / 60
+        let totalMinutes = Int(ceil(remaining / 60))
         if totalMinutes >= 60 {
             let hours = totalMinutes / 60
             let minutes = totalMinutes % 60
@@ -200,6 +209,64 @@ final class CalendarState {
             countdownText = "\(totalMinutes)m"
         }
         NotificationCenter.default.post(name: .countdownUpdated, object: nil)
+    }
+
+    // MARK: - Alerts
+
+    func saveAlertEnabled(_ value: Bool) {
+        alertEnabled = value
+        UserDefaults.standard.set(value, forKey: "alertEnabled")
+        if value {
+            startAlertTimer()
+        } else {
+            stopAlertTimer()
+            EventAlertManager.shared.dismissAll()
+        }
+    }
+
+    func saveAlertMinutesBefore(_ value: Int) {
+        alertMinutesBefore = value
+        UserDefaults.standard.set(value, forKey: "alertMinutesBefore")
+    }
+
+    func saveAlertSoundEnabled(_ value: Bool) {
+        alertSoundEnabled = value
+        UserDefaults.standard.set(value, forKey: "alertSoundEnabled")
+    }
+
+    private func startAlertTimer() {
+        alertTimer?.cancel()
+        alertTimer = Task { @MainActor [weak self] in
+            self?.checkAlerts()
+            while !Task.isCancelled {
+                let secondsToNextMinute = 60 - Calendar.current.component(.second, from: Date())
+                try? await Task.sleep(for: .seconds(secondsToNextMinute))
+                guard !Task.isCancelled else { break }
+                self?.checkAlerts()
+            }
+        }
+    }
+
+    private func stopAlertTimer() {
+        alertTimer?.cancel()
+        alertTimer = nil
+    }
+
+    private func checkAlerts() {
+        let now = Date()
+        let threshold = Double(alertMinutesBefore) * 60
+
+        let upcoming = events
+            .filter { $0.startDate > now && $0.startDate.timeIntervalSince(now) <= threshold }
+
+        for event in upcoming {
+            guard let id = event.calendarItemIdentifier as String?,
+                  !alertedEventIDs.contains(id) else { continue }
+            alertedEventIDs.insert(id)
+            EventAlertManager.shared.show(event: event, soundEnabled: alertSoundEnabled)
+        }
+
+        EventAlertManager.shared.dismissIfPast()
     }
 
     // MARK: - Init
@@ -213,6 +280,11 @@ final class CalendarState {
         let savedThreshold = UserDefaults.standard.integer(forKey: "countdownThreshold")
         self.countdownThreshold = savedThreshold > 0 ? savedThreshold : Layout.defaultCountdownThreshold
         self.displayedMonth = Date()
+
+        self.alertEnabled = UserDefaults.standard.bool(forKey: "alertEnabled")
+        let savedAlertMinutes = UserDefaults.standard.integer(forKey: "alertMinutesBefore")
+        self.alertMinutesBefore = savedAlertMinutes > 0 ? savedAlertMinutes : 5
+        self.alertSoundEnabled = UserDefaults.standard.bool(forKey: "alertSoundEnabled")
 
         observerTask = Task { @MainActor [weak self] in
             for await _ in NotificationCenter.default.notifications(named: .checkCalendarAccess) {
@@ -230,6 +302,10 @@ final class CalendarState {
 
         if countdownEnabled {
             startCountdownTimer()
+        }
+
+        if alertEnabled {
+            startAlertTimer()
         }
     }
 }

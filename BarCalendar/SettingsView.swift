@@ -45,6 +45,32 @@ struct SettingsView: View {
                     }
                 }
             }
+
+            Section("Alerts") {
+                Toggle("Show event alerts", isOn: Binding(
+                    get: { state.alertEnabled },
+                    set: { state.saveAlertEnabled($0) }
+                ))
+                if state.alertEnabled {
+                    Picker("Alert before", selection: Binding(
+                        get: { state.alertMinutesBefore },
+                        set: { state.saveAlertMinutesBefore($0) }
+                    )) {
+                        Text("1 minute").tag(1)
+                        Text("3 minutes").tag(3)
+                        Text("5 minutes").tag(5)
+                        Text("10 minutes").tag(10)
+                        Text("15 minutes").tag(15)
+                        Text("20 minutes").tag(20)
+                        Text("25 minutes").tag(25)
+                        Text("30 minutes").tag(30)
+                    }
+                    Toggle("Play sound", isOn: Binding(
+                        get: { state.alertSoundEnabled },
+                        set: { state.saveAlertSoundEnabled($0) }
+                    ))
+                }
+            }
         }
         .formStyle(.grouped)
         .navigationTitle("Settings")
