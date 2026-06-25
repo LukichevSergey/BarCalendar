@@ -5,33 +5,57 @@ import AppKit
 struct EventsSectionView: View {
     @Bindable var state: CalendarState
 
-    private var todayEvents: [EKEvent] {
-        state.eventsForDay(Date())
-    }
-
-    private var tomorrowEvents: [EKEvent] {
-        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
-        return state.eventsForDay(tomorrow)
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             if !state.hasCalendarAccess {
                 PermissionPromptView(state: state)
-            } else if todayEvents.isEmpty && tomorrowEvents.isEmpty {
-                Text("No upcoming events")
+            } else if state.eventsDaysToShow == 0 {
+                Text("Events hidden")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
             } else {
-                if !todayEvents.isEmpty {
-                    EventGroupView(title: "Today", events: todayEvents)
-                }
-                if !tomorrowEvents.isEmpty {
-                    EventGroupView(title: "Tomorrow", events: tomorrowEvents)
+                let dayGroups = upcomingDayGroups
+                ForEach(dayGroups, id: \.label) { group in
+                    if group.events.isEmpty {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(group.label)
+                                .font(.caption.bold())
+                                .foregroundStyle(.secondary)
+                            Text("—")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
+                    } else {
+                        EventGroupView(title: group.label, events: group.events)
+                    }
                 }
             }
         }
+    }
+
+    private var upcomingDayGroups: [(label: String, events: [EKEvent])] {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        var groups: [(label: String, events: [EKEvent])] = []
+
+        for offset in 0..<state.eventsDaysToShow {
+            guard let date = cal.date(byAdding: .day, value: offset, to: today) else { continue }
+            let dayEvents = state.eventsForDay(date)
+            let label: String
+            if offset == 0 {
+                label = "Today"
+            } else if offset == 1 {
+                label = "Tomorrow"
+            } else {
+                let formatter = DateFormatter()
+                formatter.locale = .current
+                formatter.dateFormat = "EEEE"
+                label = formatter.string(from: date)
+            }
+            groups.append((label: label, events: dayEvents))
+        }
+        return groups
     }
 }
 
