@@ -36,13 +36,12 @@ final class CalendarState {
     private var calendarChangeTask: Task<Void, Never>?
     private var countdownTimer: Task<Void, Never>?
 
-    /// Current day number as a string, for display in the menu bar.
+    /// Countdown text for the menu bar. Empty when no countdown is active.
     var menuBarDateText: String {
-        let day = Calendar.current.component(.day, from: Date())
         if countdownEnabled && !countdownText.isEmpty {
-            return "\(day)  \(countdownText)"
+            return countdownText
         }
-        return "\(day)"
+        return ""
     }
 
     // MARK: - Access
