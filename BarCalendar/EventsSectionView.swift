@@ -57,7 +57,9 @@ struct EventRowView: View {
     private var timeString: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
-        return formatter.string(from: event.startDate)
+        let start = formatter.string(from: event.startDate)
+        let end = formatter.string(from: event.endDate)
+        return "\(start)–\(end)"
     }
 
     var body: some View {

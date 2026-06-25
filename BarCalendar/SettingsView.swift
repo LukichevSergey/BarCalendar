@@ -2,21 +2,20 @@ import SwiftUI
 
 struct SettingsView: View {
     @Bindable var state: CalendarState
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Start of Week")
-                .font(.caption.bold())
-                .foregroundStyle(.secondary)
-            Picker("", selection: Binding(
+        Form {
+            Picker("Start of Week", selection: Binding(
                 get: { state.startOfWeek },
                 set: { state.saveStartOfWeek($0) }
             )) {
                 Text("Monday").tag(2)
                 Text("Sunday").tag(1)
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
         }
+        .formStyle(.grouped)
+        .navigationTitle("Settings")
+        .frame(width: 300)
     }
 }
