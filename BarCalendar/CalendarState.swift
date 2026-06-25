@@ -117,6 +117,12 @@ final class CalendarState {
         fetchEvents()
     }
 
+    /// Resets the displayed month to the current month and re-fetches events.
+    func resetToCurrentMonth() {
+        displayedMonth = Date()
+        fetchEvents()
+    }
+
     // MARK: - Persistence
 
     /// Persists the start-of-week preference and updates the property.
