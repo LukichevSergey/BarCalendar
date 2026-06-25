@@ -27,7 +27,7 @@ final class SettingsWindowController {
         let newWindow = NSWindow(contentViewController: hostingController)
         newWindow.title = "Settings"
         newWindow.styleMask = [.titled, .closable]
-        newWindow.setContentSize(NSSize(width: 300, height: 100))
+        newWindow.setContentSize(hostingController.view.fittingSize)
         newWindow.center()
         newWindow.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)

@@ -11,7 +11,7 @@ struct CalendarDropdownView: View {
                     SettingsWindowController.shared.show(state)
                 } label: {
                     Image(systemName: "gearshape")
-                        .font(.caption)
+                        .font(.body)
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)

@@ -86,6 +86,10 @@ struct EventRowView: View {
         return "\(start)–\(end)"
     }
 
+    private var isPast: Bool {
+        event.endDate < Date()
+    }
+
     var body: some View {
         HStack(spacing: 6) {
             Circle()
@@ -94,6 +98,8 @@ struct EventRowView: View {
             Text(event.title ?? "Untitled")
                 .font(.caption)
                 .lineLimit(1)
+                .strikethrough(isPast)
+                .foregroundStyle(isPast ? .secondary : .primary)
             Spacer()
             Text(timeString)
                 .font(.caption.monospacedDigit())
