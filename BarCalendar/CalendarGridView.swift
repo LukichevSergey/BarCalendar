@@ -25,10 +25,10 @@ struct CalendarGridView: View {
     }
 
     var body: some View {
-        LazyVGrid(columns: columns, spacing: 4) {
+        LazyVGrid(columns: columns, spacing: Layout.gridSpacing) {
             ForEach(0..<leadingEmptyDays, id: \.self) { _ in
                 Color.clear
-                    .frame(height: 28)
+                    .frame(height: Layout.dayCellSize)
             }
 
             ForEach(daysInMonth, id: \.self) { date in

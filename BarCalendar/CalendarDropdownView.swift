@@ -4,7 +4,7 @@ struct CalendarDropdownView: View {
     @Bindable var state: CalendarState
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Layout.padding) {
             HStack {
                 MonthHeaderView(state: state)
                 Button {
@@ -15,6 +15,7 @@ struct CalendarDropdownView: View {
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
+                .help("Open settings")
             }
 
             WeekdayHeaderRow(startOfWeek: state.startOfWeek)
@@ -34,7 +35,7 @@ struct CalendarDropdownView: View {
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, alignment: .center)
         }
-        .padding(12)
-        .frame(width: 280)
+        .padding(Layout.padding)
+        .frame(width: Layout.popoverWidth)
     }
 }

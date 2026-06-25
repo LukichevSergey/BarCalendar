@@ -3,11 +3,15 @@ import SwiftUI
 struct MonthHeaderView: View {
     @Bindable var state: CalendarState
 
-    private var monthTitle: String {
+    private static let monthFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = .current
         formatter.dateFormat = "LLLL yyyy"
-        return formatter.string(from: state.displayedMonth)
+        return formatter
+    }()
+
+    private var monthTitle: String {
+        Self.monthFormatter.string(from: state.displayedMonth)
     }
 
     var body: some View {
@@ -18,6 +22,7 @@ struct MonthHeaderView: View {
                 Image(systemName: "chevron.left")
             }
             .buttonStyle(.plain)
+            .help("Previous month")
 
             Spacer()
 
@@ -33,6 +38,7 @@ struct MonthHeaderView: View {
                 Image(systemName: "chevron.right")
             }
             .buttonStyle(.plain)
+            .help("Next month")
         }
     }
 }

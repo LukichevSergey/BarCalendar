@@ -1,12 +1,18 @@
 import SwiftUI
 import EventKit
-import AppKit
 
 struct EventsSectionView: View {
     @Bindable var state: CalendarState
 
+    private static let weekdayFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = .current
+        formatter.dateFormat = "EEEE"
+        return formatter
+    }()
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: Layout.sectionSpacing) {
             if !state.hasCalendarAccess {
                 PermissionPromptView(state: state)
             } else if state.eventsDaysToShow == 0 {
@@ -18,7 +24,7 @@ struct EventsSectionView: View {
                 let dayGroups = upcomingDayGroups
                 ForEach(dayGroups, id: \.label) { group in
                     if group.events.isEmpty {
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: Layout.groupSpacing) {
                             Text(group.label)
                                 .font(.caption.bold())
                                 .foregroundStyle(.secondary)
@@ -48,99 +54,10 @@ struct EventsSectionView: View {
             } else if offset == 1 {
                 label = "Tomorrow"
             } else {
-                let formatter = DateFormatter()
-                formatter.locale = .current
-                formatter.dateFormat = "EEEE"
-                label = formatter.string(from: date)
+                label = Self.weekdayFormatter.string(from: date)
             }
             groups.append((label: label, events: dayEvents))
         }
         return groups
-    }
-}
-
-struct EventGroupView: View {
-    let title: String
-    let events: [EKEvent]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(.caption.bold())
-                .foregroundStyle(.secondary)
-            ForEach(events, id: \.eventIdentifier) { event in
-                EventRowView(event: event)
-            }
-        }
-    }
-}
-
-struct EventRowView: View {
-    let event: EKEvent
-
-    private var timeString: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        let start = formatter.string(from: event.startDate)
-        let end = formatter.string(from: event.endDate)
-        return "\(start)–\(end)"
-    }
-
-    private var isPast: Bool {
-        event.endDate < Date()
-    }
-
-    var body: some View {
-        HStack(spacing: 6) {
-            Circle()
-                .fill(Color(event.calendar.color))
-                .frame(width: 6, height: 6)
-            Text(event.title ?? "Untitled")
-                .font(.caption)
-                .lineLimit(1)
-                .strikethrough(isPast)
-                .foregroundStyle(isPast ? .secondary : .primary)
-            Spacer()
-            Text(timeString)
-                .font(.caption.monospacedDigit())
-                .foregroundStyle(.secondary)
-        }
-    }
-}
-
-struct PermissionPromptView: View {
-    @Bindable var state: CalendarState
-
-    var body: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "calendar.badge.exclamationmark")
-                .font(.title2)
-                .foregroundStyle(.secondary)
-            Text("Calendar access required")
-                .font(.caption)
-            Text("Allow BarCalendar to read your calendar events.")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-            Button("Grant Access") {
-                state.requestCalendarAccess()
-            }
-            .controlSize(.small)
-            .buttonStyle(.borderedProminent)
-            HStack(spacing: 8) {
-                Button("Open System Settings") {
-                    if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars") {
-                        NSWorkspace.shared.open(url)
-                    }
-                }
-                .controlSize(.small)
-                Button("Check again") {
-                    NotificationCenter.default.post(name: .checkCalendarAccess, object: nil)
-                }
-                .controlSize(.small)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
     }
 }

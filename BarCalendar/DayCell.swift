@@ -14,17 +14,18 @@ struct DayCell: View {
             Text(dayNumber)
                 .font(.system(.body, design: .rounded))
                 .foregroundStyle(isToday ? .white : .primary)
-                .frame(width: 28, height: 28)
+                .frame(width: Layout.dayCellSize, height: Layout.dayCellSize)
                 .background(
                     isToday ? Circle().fill(.blue) : nil
                 )
+                .animation(.easeInOut, value: isToday)
 
             if hasEvents {
                 Circle()
                     .fill(.orange)
-                    .frame(width: 4, height: 4)
+                    .frame(width: Layout.eventDotSize, height: Layout.eventDotSize)
             } else {
-                Color.clear.frame(width: 4, height: 4)
+                Color.clear.frame(width: Layout.eventDotSize, height: Layout.eventDotSize)
             }
         }
         .contentShape(Rectangle())
