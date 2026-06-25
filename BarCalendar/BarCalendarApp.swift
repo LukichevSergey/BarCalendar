@@ -1,17 +1,16 @@
-//
-//  BarCalendarApp.swift
-//  BarCalendar
-//
-//  Created by LukichevSergey on 25.06.2026.
-//
-
 import SwiftUI
 
 @main
 struct BarCalendarApp: App {
+    @State private var calendarState = CalendarState()
+
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        MenuBarExtra {
+            CalendarDropdownView(state: calendarState)
+        } label: {
+            Text(calendarState.menuBarDateText)
+                .font(.system(.body, design: .monospaced))
         }
+        .menuBarExtraStyle(.window)
     }
 }
