@@ -19,6 +19,7 @@ struct EventGroupView: View {
 
 struct EventRowView: View {
     let event: EKEvent
+    @State private var now = Date()
 
     private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -36,7 +37,7 @@ struct EventRowView: View {
     }
 
     private var isPast: Bool {
-        event.endDate < Date()
+        event.endDate < now
     }
 
     var body: some View {
@@ -54,5 +55,6 @@ struct EventRowView: View {
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(.secondary)
         }
+        .task { now = Date() }
     }
 }
