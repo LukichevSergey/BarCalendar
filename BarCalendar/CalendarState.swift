@@ -36,6 +36,8 @@ final class CalendarState {
     var alertMinutesBefore: Int
     /// Whether to play a sound when the alert appears.
     var alertSoundEnabled: Bool
+    /// Date selected by clicking a day cell, or nil.
+    var selectedDate: Date?
 
     private let eventStore = EKEventStore()
     private var observerTask: Task<Void, Never>?

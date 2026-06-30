@@ -62,9 +62,26 @@ struct CalendarGridView: View {
                 DayCell(
                     date: item.date,
                     isToday: Calendar.current.isDateInToday(item.date),
+                    isSelected: state.selectedDate.map { Calendar.current.isDate($0, inSameDayAs: item.date) } ?? false,
                     events: state.eventsForDay(item.date),
                     isCurrentMonth: item.isCurrentMonth
                 )
+                .onTapGesture {
+                    if state.selectedDate.map({ Calendar.current.isDate($0, inSameDayAs: item.date) }) ?? false {
+                        state.selectedDate = nil
+                    } else {
+                        state.selectedDate = item.date
+                    }
+                }
+                .popover(isPresented: Binding(
+                    get: { state.selectedDate.map { Calendar.current.isDate($0, inSameDayAs: item.date) } ?? false },
+                    set: { if !$0 { state.selectedDate = nil } }
+                )) {
+                    DayEventsPopover(
+                        date: item.date,
+                        events: state.eventsForDay(item.date)
+                    )
+                }
             }
         }
     }

@@ -4,6 +4,7 @@ import EventKit
 struct DayCell: View {
     let date: Date
     let isToday: Bool
+    let isSelected: Bool
     let events: [EKEvent]
     let isCurrentMonth: Bool
 
@@ -39,9 +40,17 @@ struct DayCell: View {
                 .foregroundStyle(isToday ? .white : (isCurrentMonth ? .primary : .secondary.opacity(0.5)))
                 .frame(width: Layout.dayCellSize, height: Layout.dayCellSize)
                 .background(
-                    isToday ? Circle().fill(.blue) : nil
+                    Group {
+                        if isToday {
+                            Circle().fill(.blue)
+                        } else if isSelected {
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color.accentColor, lineWidth: 1.5)
+                        }
+                    }
                 )
                 .animation(.easeInOut, value: isToday)
+                .animation(.easeInOut, value: isSelected)
 
             HStack(spacing: 2) {
                 ForEach(visibleDots.indices, id: \.self) { i in
