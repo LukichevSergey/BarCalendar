@@ -35,6 +35,19 @@ struct EventAlertView: View {
         return formatter.string(from: event.startDate)
     }
 
+    private var locationURL: URL? {
+        guard let loc = event.location?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !loc.isEmpty,
+              (loc.hasPrefix("http://") || loc.hasPrefix("https://")),
+              let url = URL(string: loc) else { return nil }
+        return url
+    }
+
+    private var hasLocation: Bool {
+        guard let loc = event.location?.trimmingCharacters(in: .whitespacesAndNewlines) else { return false }
+        return !loc.isEmpty
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
@@ -51,6 +64,21 @@ struct EventAlertView: View {
                 Text(timeString)
                     .font(.system(size: 72, weight: .bold, design: .rounded))
                     .foregroundStyle(.primary)
+
+                if hasLocation {
+                    if let url = locationURL {
+                        Link(url.absoluteString, destination: url)
+                            .font(.system(size: 14))
+                            .lineLimit(1)
+                            .foregroundStyle(.blue)
+                    } else {
+                        Text(event.location!.trimmingCharacters(in: .whitespacesAndNewlines))
+                            .font(.system(size: 14))
+                            .lineLimit(2)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                }
             }
 
             Spacer()
