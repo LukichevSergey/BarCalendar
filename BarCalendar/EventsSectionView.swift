@@ -11,6 +11,13 @@ struct EventsSectionView: View {
         return formatter
     }()
 
+    private static let monthFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = .current
+        formatter.dateFormat = "MMMM"
+        return formatter
+    }()
+
     var body: some View {
         VStack(alignment: .leading, spacing: Layout.sectionSpacing) {
             if !state.hasCalendarAccess {
@@ -48,13 +55,15 @@ struct EventsSectionView: View {
         for offset in 0..<state.eventsDaysToShow {
             guard let date = cal.date(byAdding: .day, value: offset, to: today) else { continue }
             let dayEvents = state.eventsForDay(date)
+            let dayNumber = cal.component(.day, from: date)
+            let month = Self.monthFormatter.string(from: date)
             let label: String
             if offset == 0 {
-                label = "Today"
+                label = "Today, \(dayNumber) \(month)"
             } else if offset == 1 {
-                label = "Tomorrow"
+                label = "Tomorrow, \(dayNumber) \(month)"
             } else {
-                label = Self.weekdayFormatter.string(from: date)
+                label = "\(Self.weekdayFormatter.string(from: date)), \(dayNumber) \(month)"
             }
             groups.append((label: label, events: dayEvents))
         }
