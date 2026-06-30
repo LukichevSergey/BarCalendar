@@ -24,6 +24,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             button.title = sharedState.menuBarDateText
             button.action = #selector(togglePopover)
             button.target = self
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         }
 
         popover = NSPopover()
@@ -46,6 +47,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func togglePopover() {
         guard let button = statusItem?.button else { return }
+
+        if NSApp.currentEvent?.type == .rightMouseUp {
+            showContextMenu()
+            return
+        }
+
         if let popover = popover, popover.isShown {
             popover.performClose(nil)
         } else {
@@ -53,5 +60,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             popover?.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             popover?.contentViewController?.view.window?.makeKey()
         }
+    }
+
+    private func showContextMenu() {
+        let menu = NSMenu()
+
+        let settingsItem = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+        settingsItem.keyEquivalentModifierMask = [.command]
+        settingsItem.target = self
+        menu.addItem(settingsItem)
+
+        menu.addItem(.separator())
+
+        let quitItem = NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        menu.addItem(quitItem)
+
+        statusItem?.menu = menu
+        statusItem?.button?.performClick(nil)
+        statusItem?.menu = nil
+    }
+
+    @objc private func openSettings() {
+        SettingsWindowController.shared.show(sharedState)
     }
 }

@@ -5,18 +5,7 @@ struct CalendarDropdownView: View {
 
     var body: some View {
         VStack(spacing: Layout.padding) {
-            HStack {
-                MonthHeaderView(state: state)
-                Button {
-                    SettingsWindowController.shared.show(state)
-                } label: {
-                    Image(systemName: "gearshape")
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                }
-                .buttonStyle(.plain)
-                .help("Open settings")
-            }
+            MonthHeaderView(state: state)
 
             WeekdayHeaderRow(startOfWeek: state.startOfWeek)
             CalendarGridView(state: state)
@@ -26,16 +15,6 @@ struct CalendarDropdownView: View {
             Divider()
 
             EventsSectionView(state: state)
-
-            Divider()
-
-            Button("Quit") {
-                NSApplication.shared.terminate(nil)
-            }
-            .buttonStyle(.plain)
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity, alignment: .center)
         }
         .padding(Layout.padding)
         .frame(width: Layout.popoverWidth)
