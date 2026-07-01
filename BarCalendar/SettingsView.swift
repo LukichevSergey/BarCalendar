@@ -20,50 +20,51 @@ struct SettingsView: View {
                 }
             }
 
-            Picker("Start of Week", selection: Binding(
-                get: { state.startOfWeek },
-                set: { state.saveStartOfWeek($0) }
-            )) {
-                Text("Monday").tag(2)
-                Text("Sunday").tag(1)
-            }
+            Section("General") {
+                Picker("Start of Week", selection: Binding(
+                    get: { state.startOfWeek },
+                    set: { state.saveStartOfWeek($0) }
+                )) {
+                    Text("Monday").tag(2)
+                    Text("Sunday").tag(1)
+                }
 
-            Picker("Days to Show", selection: Binding(
-                get: { state.eventsDaysToShow },
-                set: { state.saveEventsDaysToShow($0) }
-            )) {
-                Text("Off").tag(0)
-                Text("1 day").tag(1)
-                Text("2 days").tag(2)
-                Text("3 days").tag(3)
-                Text("4 days").tag(4)
-                Text("5 days").tag(5)
-                Text("6 days").tag(6)
-                Text("7 days").tag(7)
-            }
+                Picker("Days to Show", selection: Binding(
+                    get: { state.eventsDaysToShow },
+                    set: { state.saveEventsDaysToShow($0) }
+                )) {
+                    Text("Off").tag(0)
+                    Text("1 day").tag(1)
+                    Text("2 days").tag(2)
+                    Text("3 days").tag(3)
+                    Text("4 days").tag(4)
+                    Text("5 days").tag(5)
+                    Text("6 days").tag(6)
+                    Text("7 days").tag(7)
+                }
 
-            Toggle("Show event location", isOn: Binding(
-                get: { state.showEventLocation },
-                set: { state.saveShowEventLocation($0) }
-            ))
+                Toggle("Show event location", isOn: Binding(
+                    get: { state.showEventLocation },
+                    set: { state.saveShowEventLocation($0) }
+                ))
+            }
 
             Section("Countdown") {
                 Toggle("Show countdown timer", isOn: Binding(
                     get: { state.countdownEnabled },
                     set: { state.saveCountdownEnabled($0) }
                 ))
-                if state.countdownEnabled {
-                    Picker("Threshold", selection: Binding(
-                        get: { state.countdownThreshold },
-                        set: { state.saveCountdownThreshold($0) }
-                    )) {
-                        Text("15 minutes").tag(15)
-                        Text("30 minutes").tag(30)
-                        Text("1 hour").tag(60)
-                        Text("2 hours").tag(120)
-                        Text("3 hours").tag(180)
-                    }
+                Picker("Threshold", selection: Binding(
+                    get: { state.countdownThreshold },
+                    set: { state.saveCountdownThreshold($0) }
+                )) {
+                    Text("15 minutes").tag(15)
+                    Text("30 minutes").tag(30)
+                    Text("1 hour").tag(60)
+                    Text("2 hours").tag(120)
+                    Text("3 hours").tag(180)
                 }
+                .disabled(!state.countdownEnabled)
             }
 
             Section("Alerts") {
@@ -71,25 +72,25 @@ struct SettingsView: View {
                     get: { state.alertEnabled },
                     set: { state.saveAlertEnabled($0) }
                 ))
-                if state.alertEnabled {
-                    Picker("Alert before", selection: Binding(
-                        get: { state.alertMinutesBefore },
-                        set: { state.saveAlertMinutesBefore($0) }
-                    )) {
-                        Text("1 minute").tag(1)
-                        Text("3 minutes").tag(3)
-                        Text("5 minutes").tag(5)
-                        Text("10 minutes").tag(10)
-                        Text("15 minutes").tag(15)
-                        Text("20 minutes").tag(20)
-                        Text("25 minutes").tag(25)
-                        Text("30 minutes").tag(30)
-                    }
-                    Toggle("Play sound", isOn: Binding(
-                        get: { state.alertSoundEnabled },
-                        set: { state.saveAlertSoundEnabled($0) }
-                    ))
+                Picker("Alert before", selection: Binding(
+                    get: { state.alertMinutesBefore },
+                    set: { state.saveAlertMinutesBefore($0) }
+                )) {
+                    Text("1 minute").tag(1)
+                    Text("3 minutes").tag(3)
+                    Text("5 minutes").tag(5)
+                    Text("10 minutes").tag(10)
+                    Text("15 minutes").tag(15)
+                    Text("20 minutes").tag(20)
+                    Text("25 minutes").tag(25)
+                    Text("30 minutes").tag(30)
                 }
+                .disabled(!state.alertEnabled)
+                Toggle("Play sound", isOn: Binding(
+                    get: { state.alertSoundEnabled },
+                    set: { state.saveAlertSoundEnabled($0) }
+                ))
+                .disabled(!state.alertEnabled)
             }
         }
         .formStyle(.grouped)
