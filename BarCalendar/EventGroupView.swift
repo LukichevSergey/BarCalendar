@@ -5,6 +5,7 @@ struct EventGroupView: View {
     let title: String
     let events: [EKEvent]
     let showLocation: Bool
+    @State private var now = Date()
 
     var body: some View {
         VStack(alignment: .leading, spacing: Layout.sectionSpacing) {
@@ -12,16 +13,17 @@ struct EventGroupView: View {
                 .font(.caption.bold())
                 .foregroundStyle(.secondary)
             ForEach(events, id: \.eventIdentifier) { event in
-                EventRowView(event: event, showLocation: showLocation)
+                EventRowView(event: event, showLocation: showLocation, now: now)
             }
         }
+        .onAppear { now = Date() }
     }
 }
 
 struct EventRowView: View {
     let event: EKEvent
     let showLocation: Bool
-    @State private var now = Date()
+    let now: Date
 
     private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -87,6 +89,5 @@ struct EventRowView: View {
                 }
             }
         }
-        .task { now = Date() }
     }
 }

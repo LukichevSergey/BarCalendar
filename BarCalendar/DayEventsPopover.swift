@@ -5,6 +5,7 @@ struct DayEventsPopover: View {
     let date: Date
     let events: [EKEvent]
     let showLocation: Bool
+    @State private var now = Date()
 
     fileprivate static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -33,19 +34,20 @@ struct DayEventsPopover: View {
                     .padding(.vertical, 8)
             } else {
                 ForEach(events, id: \.eventIdentifier) { event in
-                    DayEventRow(event: event, showLocation: showLocation)
+                    DayEventRow(event: event, showLocation: showLocation, now: now)
                 }
             }
         }
         .padding(Layout.padding)
         .frame(minWidth: Layout.popoverWidth)
+        .onAppear { now = Date() }
     }
 }
 
 private struct DayEventRow: View {
     let event: EKEvent
     let showLocation: Bool
-    @State private var now = Date()
+    let now: Date
 
     private var isPast: Bool {
         event.endDate < now
@@ -105,6 +107,5 @@ private struct DayEventRow: View {
                 }
             }
         }
-        .task { now = Date() }
     }
 }
