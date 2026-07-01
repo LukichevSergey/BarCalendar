@@ -40,11 +40,17 @@ final class CalendarState {
     var languageCode: String
     /// Whether to show event location in event rows.
     var showEventLocation: Bool
+    /// Calendar identifiers selected by the user. Empty = show all calendars.
+    var selectedCalendarIDs: Set<String>
     /// Date selected by clicking a day cell, or nil.
     var selectedDate: Date?
 
     private let eventStore = EKEventStore()
     private var observerTask: Task<Void, Never>?
+
+    var availableCalendars: [EKCalendar] {
+        eventStore.calendars(for: .event).sorted { $0.title.localizedCompare($1.title) == .orderedAscending }
+    }
     private var calendarChangeTask: Task<Void, Never>?
     private var countdownTimer: Task<Void, Never>?
     private var alertTimer: Task<Void, Never>?
@@ -92,7 +98,10 @@ final class CalendarState {
         let rangeStart = min(monthStart, today)
         let rangeEnd = max(monthEnd, upcomingEnd)
 
-        let predicate = eventStore.predicateForEvents(withStart: rangeStart, end: rangeEnd, calendars: nil)
+        let calendars: [EKCalendar]? = selectedCalendarIDs.isEmpty
+            ? nil
+            : availableCalendars.filter { selectedCalendarIDs.contains($0.calendarIdentifier) }
+        let predicate = eventStore.predicateForEvents(withStart: rangeStart, end: rangeEnd, calendars: calendars)
         events = eventStore.events(matching: predicate)
         updateCountdown()
     }
@@ -253,6 +262,12 @@ final class CalendarState {
         UserDefaults.standard.set(value, forKey: "showEventLocation")
     }
 
+    func saveSelectedCalendarIDs(_ value: Set<String>) {
+        selectedCalendarIDs = value
+        UserDefaults.standard.set(Array(value), forKey: "selectedCalendars")
+        fetchEvents()
+    }
+
     func saveLanguage(_ code: String) {
         languageCode = code
         UserDefaults.standard.set(code, forKey: "appLanguage")
@@ -315,6 +330,8 @@ final class CalendarState {
         self.displayedMonth = Date()
 
         self.showEventLocation = UserDefaults.standard.bool(forKey: "showEventLocation")
+        let savedCalendars = UserDefaults.standard.array(forKey: "selectedCalendars") as? [String]
+        self.selectedCalendarIDs = savedCalendars != nil ? Set(savedCalendars!) : []
         self.alertEnabled = UserDefaults.standard.bool(forKey: "alertEnabled")
         let savedAlertMinutes = UserDefaults.standard.integer(forKey: "alertMinutesBefore")
         self.alertMinutesBefore = savedAlertMinutes > 0 ? savedAlertMinutes : 5

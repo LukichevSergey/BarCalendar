@@ -1,4 +1,5 @@
 import SwiftUI
+import EventKit
 
 struct SettingsView: View {
     @Bindable var state: CalendarState
@@ -47,6 +48,35 @@ struct SettingsView: View {
                     get: { state.showEventLocation },
                     set: { state.saveShowEventLocation($0) }
                 ))
+            }
+
+            Section("Calendars") {
+                ForEach(state.availableCalendars, id: \.calendarIdentifier) { calendar in
+                    Toggle(isOn: Binding(
+                        get: {
+                            state.selectedCalendarIDs.isEmpty || state.selectedCalendarIDs.contains(calendar.calendarIdentifier)
+                        },
+                        set: { isSelected in
+                            var ids = state.selectedCalendarIDs
+                            if ids.isEmpty {
+                                ids = Set(state.availableCalendars.map(\.calendarIdentifier))
+                            }
+                            if isSelected {
+                                ids.insert(calendar.calendarIdentifier)
+                            } else {
+                                ids.remove(calendar.calendarIdentifier)
+                            }
+                            state.saveSelectedCalendarIDs(ids)
+                        }
+                    )) {
+                        HStack(spacing: 6) {
+                            Circle()
+                                .fill(Color(calendar.color))
+                                .frame(width: 10, height: 10)
+                            Text(calendar.title)
+                        }
+                    }
+                }
             }
 
             Section("Countdown") {
