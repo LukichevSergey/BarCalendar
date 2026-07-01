@@ -38,6 +38,8 @@ final class CalendarState {
     var alertSoundEnabled: Bool
     /// Selected app language code: "en", "ru", or "" for system default.
     var languageCode: String
+    /// Whether to show event location in event rows.
+    var showEventLocation: Bool
     /// Date selected by clicking a day cell, or nil.
     var selectedDate: Date?
 
@@ -246,6 +248,11 @@ final class CalendarState {
         UserDefaults.standard.set(value, forKey: "alertSoundEnabled")
     }
 
+    func saveShowEventLocation(_ value: Bool) {
+        showEventLocation = value
+        UserDefaults.standard.set(value, forKey: "showEventLocation")
+    }
+
     func saveLanguage(_ code: String) {
         languageCode = code
         UserDefaults.standard.set(code, forKey: "appLanguage")
@@ -307,6 +314,7 @@ final class CalendarState {
         self.countdownThreshold = savedThreshold > 0 ? savedThreshold : Layout.defaultCountdownThreshold
         self.displayedMonth = Date()
 
+        self.showEventLocation = UserDefaults.standard.bool(forKey: "showEventLocation")
         self.alertEnabled = UserDefaults.standard.bool(forKey: "alertEnabled")
         let savedAlertMinutes = UserDefaults.standard.integer(forKey: "alertMinutesBefore")
         self.alertMinutesBefore = savedAlertMinutes > 0 ? savedAlertMinutes : 5

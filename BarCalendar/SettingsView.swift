@@ -42,6 +42,11 @@ struct SettingsView: View {
                 Text("7 days").tag(7)
             }
 
+            Toggle("Show event location", isOn: Binding(
+                get: { state.showEventLocation },
+                set: { state.saveShowEventLocation($0) }
+            ))
+
             Section("Countdown") {
                 Toggle("Show countdown timer", isOn: Binding(
                     get: { state.countdownEnabled },

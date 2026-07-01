@@ -4,6 +4,7 @@ import EventKit
 struct EventGroupView: View {
     let title: String
     let events: [EKEvent]
+    let showLocation: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: Layout.sectionSpacing) {
@@ -11,7 +12,7 @@ struct EventGroupView: View {
                 .font(.caption.bold())
                 .foregroundStyle(.secondary)
             ForEach(events, id: \.eventIdentifier) { event in
-                EventRowView(event: event)
+                EventRowView(event: event, showLocation: showLocation)
             }
         }
     }
@@ -19,6 +20,7 @@ struct EventGroupView: View {
 
 struct EventRowView: View {
     let event: EKEvent
+    let showLocation: Bool
     @State private var now = Date()
 
     private static let timeFormatter: DateFormatter = {
@@ -69,7 +71,7 @@ struct EventRowView: View {
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(.secondary)
             }
-            if hasLocation {
+            if showLocation && hasLocation {
                 if let url = locationURL {
                     Link(url.absoluteString, destination: url)
                         .font(.system(size: 9))

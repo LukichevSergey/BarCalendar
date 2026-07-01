@@ -79,7 +79,8 @@ struct CalendarGridView: View {
                 )) {
                     DayEventsPopover(
                         date: item.date,
-                        events: state.eventsForDay(item.date)
+                        events: state.eventsForDay(item.date),
+                        showLocation: state.showEventLocation
                     )
                 }
             }

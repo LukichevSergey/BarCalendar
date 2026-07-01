@@ -4,6 +4,7 @@ import EventKit
 struct DayEventsPopover: View {
     let date: Date
     let events: [EKEvent]
+    let showLocation: Bool
 
     fileprivate static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -32,7 +33,7 @@ struct DayEventsPopover: View {
                     .padding(.vertical, 8)
             } else {
                 ForEach(events, id: \.eventIdentifier) { event in
-                    DayEventRow(event: event)
+                    DayEventRow(event: event, showLocation: showLocation)
                 }
             }
         }
@@ -43,6 +44,7 @@ struct DayEventsPopover: View {
 
 private struct DayEventRow: View {
     let event: EKEvent
+    let showLocation: Bool
     @State private var now = Date()
 
     private var isPast: Bool {
@@ -87,7 +89,7 @@ private struct DayEventRow: View {
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(.secondary)
             }
-            if hasLocation {
+            if showLocation && hasLocation {
                 if let url = locationURL {
                     Link(url.absoluteString, destination: url)
                         .font(.system(size: 9))

@@ -40,7 +40,7 @@ struct EventsSectionView: View {
                                 .foregroundStyle(.tertiary)
                         }
                     } else {
-                        EventGroupView(title: group.label, events: group.events)
+                        EventGroupView(title: group.label, events: group.events, showLocation: state.showEventLocation)
                     }
                 }
             }
