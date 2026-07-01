@@ -56,14 +56,14 @@ struct EventsSectionView: View {
             guard let date = cal.date(byAdding: .day, value: offset, to: today) else { continue }
             let dayEvents = state.eventsForDay(date)
             let dayNumber = cal.component(.day, from: date)
-            let month = Self.monthFormatter.string(from: date)
+            let month = Self.monthFormatter.string(from: date).capitalized
             let label: String
             if offset == 0 {
-                label = "Today, \(dayNumber) \(month)"
+                label = "\(String(localized: "Today")), \(dayNumber) \(month)"
             } else if offset == 1 {
-                label = "Tomorrow, \(dayNumber) \(month)"
+                label = "\(String(localized: "Tomorrow")), \(dayNumber) \(month)"
             } else {
-                label = "\(Self.weekdayFormatter.string(from: date)), \(dayNumber) \(month)"
+                label = "\(Self.weekdayFormatter.string(from: date).capitalized), \(dayNumber) \(month)"
             }
             groups.append((label: label, events: dayEvents))
         }

@@ -16,7 +16,7 @@ struct WeekdayHeaderRow: View {
         } else {
             ordered = Array(symbols)
         }
-        return ordered.enumerated().map { WeekdayItem(id: $0.offset, name: $0.element) }
+        return ordered.enumerated().map { WeekdayItem(id: $0.offset, name: $0.element.capitalized) }
     }
 
     var body: some View {

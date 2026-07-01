@@ -11,7 +11,7 @@ struct MonthHeaderView: View {
     }()
 
     private var monthTitle: String {
-        Self.monthFormatter.string(from: state.displayedMonth)
+        Self.monthFormatter.string(from: state.displayedMonth).capitalized
     }
 
     var body: some View {

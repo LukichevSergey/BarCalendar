@@ -36,6 +36,8 @@ final class CalendarState {
     var alertMinutesBefore: Int
     /// Whether to play a sound when the alert appears.
     var alertSoundEnabled: Bool
+    /// Selected app language code: "en", "ru", or "" for system default.
+    var languageCode: String
     /// Date selected by clicking a day cell, or nil.
     var selectedDate: Date?
 
@@ -212,9 +214,11 @@ final class CalendarState {
         if totalMinutes >= 60 {
             let hours = totalMinutes / 60
             let minutes = totalMinutes % 60
-            countdownText = minutes > 0 ? "\(hours)h \(minutes)m" : "\(hours)h"
+            countdownText = minutes > 0
+                ? "\(hours)\(String(localized: "h")) \(minutes)\(String(localized: "m"))"
+                : "\(hours)\(String(localized: "h"))"
         } else {
-            countdownText = "\(totalMinutes)m"
+            countdownText = "\(totalMinutes)\(String(localized: "m"))"
         }
         NotificationCenter.default.post(name: .countdownUpdated, object: nil)
     }
@@ -240,6 +244,16 @@ final class CalendarState {
     func saveAlertSoundEnabled(_ value: Bool) {
         alertSoundEnabled = value
         UserDefaults.standard.set(value, forKey: "alertSoundEnabled")
+    }
+
+    func saveLanguage(_ code: String) {
+        languageCode = code
+        UserDefaults.standard.set(code, forKey: "appLanguage")
+        if code.isEmpty {
+            UserDefaults.standard.removeObject(forKey: "AppleLanguages")
+        } else {
+            UserDefaults.standard.set([code], forKey: "AppleLanguages")
+        }
     }
 
     private func startAlertTimer() {
@@ -278,6 +292,12 @@ final class CalendarState {
     // MARK: - Init
 
     init() {
+        let savedLanguage = UserDefaults.standard.string(forKey: "appLanguage") ?? ""
+        self.languageCode = savedLanguage
+        if !savedLanguage.isEmpty {
+            UserDefaults.standard.set([savedLanguage], forKey: "AppleLanguages")
+        }
+
         let savedStart = UserDefaults.standard.integer(forKey: "startOfWeek")
         self.startOfWeek = savedStart == 1 ? 1 : 2
         let savedDays = UserDefaults.standard.integer(forKey: "eventsDaysToShow")

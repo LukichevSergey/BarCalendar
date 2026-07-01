@@ -2,9 +2,24 @@ import SwiftUI
 
 struct SettingsView: View {
     @Bindable var state: CalendarState
+    @State private var showRestartAlert = false
 
     var body: some View {
         Form {
+            Section("Language") {
+                Picker("Language", selection: Binding(
+                    get: { state.languageCode.isEmpty ? "en" : state.languageCode },
+                    set: { newValue in
+                        guard newValue != state.languageCode else { return }
+                        state.saveLanguage(newValue)
+                        showRestartAlert = true
+                    }
+                )) {
+                    Text("English").tag("en")
+                    Text("Russian").tag("ru")
+                }
+            }
+
             Picker("Start of Week", selection: Binding(
                 get: { state.startOfWeek },
                 set: { state.saveStartOfWeek($0) }
@@ -74,5 +89,18 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .navigationTitle("Settings")
+        .alert("Restart Required", isPresented: $showRestartAlert) {
+            Button("Later") { }
+            Button("Restart Now") {
+                let appPath = Bundle.main.bundlePath
+                let process = Process()
+                process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+                process.arguments = ["-a", appPath]
+                try? process.run()
+                NSApplication.shared.terminate(nil)
+            }
+        } message: {
+            Text("Please restart BarCalendar to apply the language change.")
+        }
     }
 }
