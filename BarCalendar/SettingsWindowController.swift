@@ -12,22 +12,23 @@ final class SettingsWindowController {
             return
         }
 
-        let newWindow: NSWindow
         if let existing = window {
-            newWindow = existing
             (existing.contentViewController as? NSHostingController<SettingsView>)?.rootView = SettingsView(state: state)
-        } else {
-            let hosting = NSHostingController(rootView: SettingsView(state: state))
-            hosting.view.frame = NSRect(x: 0, y: 0, width: 300, height: 200)
-            newWindow = NSWindow(contentViewController: hosting)
-            newWindow.title = "Settings"
-            newWindow.styleMask = [.titled, .closable, .resizable]
-            newWindow.setContentSize(hosting.view.fittingSize)
-            self.window = newWindow
+            existing.center()
+            existing.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
         }
 
+        let hosting = NSHostingController(rootView: SettingsView(state: state))
+        hosting.view.frame = NSRect(x: 0, y: 0, width: Layout.settingsWindowWidth, height: Layout.settingsWindowHeight)
+        let newWindow = NSWindow(contentViewController: hosting)
+        newWindow.title = String(localized: "Settings")
+        newWindow.styleMask = [.titled, .closable, .resizable]
+        newWindow.setContentSize(NSSize(width: Layout.settingsWindowWidth, height: Layout.settingsWindowHeight))
         newWindow.center()
         newWindow.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+        self.window = newWindow
     }
 }

@@ -20,4 +20,6 @@ enum Layout {
     static let alertButtonHeight: CGFloat = 44
     static let alertButtonCornerRadius: CGFloat = 22
     static let screenEdgePadding: CGFloat = 40
+    static let settingsWindowWidth: CGFloat = 340
+    static let settingsWindowHeight: CGFloat = 340
 }
